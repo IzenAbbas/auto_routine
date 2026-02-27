@@ -1,3 +1,4 @@
+import 'package:auto_routine/authentication/signin.dart';
 import 'package:auto_routine/authentication/signup.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +18,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Auto-Routine',
       theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.deepPurple)),
-      home: const SignUp(),
+      home: const SignIn(),
     );
   }
 }

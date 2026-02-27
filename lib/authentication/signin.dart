@@ -1,4 +1,7 @@
+import 'package:auto_routine/authentication/signup.dart';
 import 'package:auto_routine/colors.dart';
+import 'package:auto_routine/profile.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -11,6 +14,70 @@ class SignIn extends StatefulWidget {
 
 class _SignInState extends State<SignIn> {
   bool _obscurePassword = true;
+  bool _isLoading = false;
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _signIn() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in all fields')),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const CurrentuserDetails()),
+      );
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+      String message;
+      switch (e.code) {
+        case 'user-not-found':
+          message = 'No account found for that email.';
+          break;
+        case 'wrong-password':
+          message = 'Incorrect password.';
+          break;
+        case 'invalid-email':
+          message = 'The email address is invalid.';
+          break;
+        case 'user-disabled':
+          message = 'This account has been disabled.';
+          break;
+        default:
+          message = e.message ?? 'Sign in failed. Please try again.';
+      }
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('An error occurred: $e')));
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
   Widget _buildField({
     required String label,
@@ -18,6 +85,7 @@ class _SignInState extends State<SignIn> {
     required IconData icon,
     bool obscure = false,
     Widget? suffixIcon,
+    TextEditingController? controller,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -32,6 +100,7 @@ class _SignInState extends State<SignIn> {
         ),
         const SizedBox(height: 6),
         TextField(
+          controller: controller,
           obscureText: obscure,
           style: TextStyle(color: isLight ? primaryText[0] : primaryText[1]),
           decoration: InputDecoration(
@@ -114,6 +183,7 @@ class _SignInState extends State<SignIn> {
                 label: 'Email Address',
                 hint: 'Enter your email',
                 icon: Icons.mail_outline,
+                controller: _emailController,
               ),
               const SizedBox(height: 16),
               _buildField(
@@ -121,6 +191,7 @@ class _SignInState extends State<SignIn> {
                 hint: 'Enter your password',
                 icon: Icons.lock_outline,
                 obscure: _obscurePassword,
+                controller: _passwordController,
                 suffixIcon: IconButton(
                   onPressed: () {
                     setState(() {
@@ -139,7 +210,7 @@ class _SignInState extends State<SignIn> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: _isLoading ? null : _signIn,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryAccent,
                     foregroundColor: primaryText[0],
@@ -148,10 +219,19 @@ class _SignInState extends State<SignIn> {
                       borderRadius: BorderRadius.circular(28),
                     ),
                   ),
-                  child: const Text(
-                    'Sign In',
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'Sign In',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
                 ),
               ),
               const SizedBox(height: 18),
@@ -207,7 +287,11 @@ class _SignInState extends State<SignIn> {
               const SizedBox(height: 18),
               Center(
                 child: TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.of(
+                      context,
+                    ).push(MaterialPageRoute(builder: (_) => const SignUp()));
+                  },
                   child: RichText(
                     text: TextSpan(
                       style: TextStyle(

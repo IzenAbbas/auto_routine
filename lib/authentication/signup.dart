@@ -1,4 +1,5 @@
 import 'package:auto_routine/colors.dart';
+import 'package:auto_routine/profile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -61,11 +62,17 @@ class _SignUpState extends State<SignUp> {
       await userCredential.user?.updateDisplayName(_nameController.text.trim());
 
       // Save user data to Firestore
-      await _firestore.collection('users').doc(userCredential.user?.uid).set({
-        'name': _nameController.text.trim(),
-        'email': _emailController.text.trim(),
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+      try {
+        await _firestore.collection('users').doc(userCredential.user?.uid).set({
+          'name': _nameController.text.trim(),
+          'email': _emailController.text.trim(),
+        });
+      } on FirebaseException catch (e) {
+        // If Firestore fails, delete the auth user to keep things in sync
+        await userCredential.user?.delete();
+        _showError('Database error: ${e.message}. Please try again.');
+        return;
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -74,8 +81,10 @@ class _SignUpState extends State<SignUp> {
             backgroundColor: Colors.green,
           ),
         );
-        // Navigate back to sign in or home
-        Navigator.pop(context);
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const CurrentuserDetails()),
+          (route) => false,
+        );
       }
     } on FirebaseAuthException catch (e) {
       String message = 'An error occurred';
@@ -90,7 +99,7 @@ class _SignUpState extends State<SignUp> {
       }
       _showError(message);
     } catch (e) {
-      _showError('An unexpected error occurred');
+      _showError('Error: ${e.toString()}');
     } finally {
       if (mounted) {
         setState(() {
