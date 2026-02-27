@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-bool isLight = true;
+bool isLight = false;
 //Accent
 const Color primaryAccent = Color(0xFF14E56A);
 const List<Color> secondaryAccent = [Color(0xFFE2FBEB), Color(0xFF0C4F2E)];
