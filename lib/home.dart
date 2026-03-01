@@ -7,8 +7,16 @@ import 'package:auto_routine/tasks/task_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+
+enum SortOption {
+  dueDate('Due Date'),
+  priority('Priority'),
+  lastUpdated('Last Updated');
+
+  final String label;
+  const SortOption(this.label);
+}
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -77,6 +85,7 @@ class _HomeBody extends StatefulWidget {
 
 class _HomeBodyState extends State<_HomeBody> {
   final Set<String> _selectedIds = {};
+  SortOption _sortBy = SortOption.lastUpdated;
 
   bool get _isSelecting => _selectedIds.isNotEmpty;
 
@@ -228,7 +237,48 @@ class _HomeBodyState extends State<_HomeBody> {
                   tooltip: 'Delete selected',
                 ),
               ]
-            : null,
+            : [
+                PopupMenuButton<SortOption>(
+                  icon: Icon(
+                    Icons.sort,
+                    color: widget.isLight ? primaryText[0] : primaryText[1],
+                  ),
+                  tooltip: 'Sort by',
+                  color: widget.isLight ? appBackground[0] : appBackground[1],
+                  onSelected: (value) {
+                    setState(() => _sortBy = value);
+                  },
+                  itemBuilder: (context) => SortOption.values.map((option) {
+                    return PopupMenuItem(
+                      value: option,
+                      child: Row(
+                        children: [
+                          if (_sortBy == option)
+                            const Icon(
+                              Icons.check,
+                              color: primaryAccent,
+                              size: 18,
+                            )
+                          else
+                            const SizedBox(width: 18),
+                          const SizedBox(width: 8),
+                          Text(
+                            option.label,
+                            style: TextStyle(
+                              color: widget.isLight
+                                  ? primaryText[0]
+                                  : primaryText[1],
+                              fontWeight: _sortBy == option
+                                  ? FontWeight.w600
+                                  : FontWeight.normal,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
@@ -294,6 +344,7 @@ class _HomeBodyState extends State<_HomeBody> {
           }
 
           final tasks = docs.map((doc) => Task.fromFirestore(doc)).toList();
+          _sortTasks(tasks);
           _currentTasks = tasks;
 
           return ListView.builder(
@@ -317,6 +368,22 @@ class _HomeBodyState extends State<_HomeBody> {
   }
 
   List<Task> _currentTasks = [];
+
+  void _sortTasks(List<Task> tasks) {
+    switch (_sortBy) {
+      case SortOption.dueDate:
+        tasks.sort((a, b) {
+          if (a.dueDate == null && b.dueDate == null) return 0;
+          if (a.dueDate == null) return 1;
+          if (b.dueDate == null) return -1;
+          return a.dueDate!.compareTo(b.dueDate!);
+        });
+      case SortOption.priority:
+        tasks.sort((a, b) => b.priority.index.compareTo(a.priority.index));
+      case SortOption.lastUpdated:
+        tasks.sort((a, b) => b.lastUpdated.compareTo(a.lastUpdated));
+    }
+  }
 }
 
 class _TaskTile extends StatelessWidget {
@@ -421,28 +488,30 @@ class _TaskTile extends StatelessWidget {
                       ],
                     ),
                   ),
-                  IconButton(
-                    icon: Icon(
-                      Icons.edit_outlined,
-                      color: isLight ? secondaryText[0] : secondaryText[1],
-                      size: 20,
+                  if (!isSelecting) ...[
+                    IconButton(
+                      icon: Icon(
+                        Icons.edit_outlined,
+                        color: isLight ? secondaryText[0] : secondaryText[1],
+                        size: 20,
+                      ),
+                      onPressed: () => editTask(context, task),
+                      tooltip: 'Edit',
+                      constraints: const BoxConstraints(),
+                      padding: const EdgeInsets.all(6),
                     ),
-                    onPressed: () => editTask(context, task),
-                    tooltip: 'Edit',
-                    constraints: const BoxConstraints(),
-                    padding: const EdgeInsets.all(6),
-                  ),
-                  IconButton(
-                    icon: const Icon(
-                      Icons.delete,
-                      color: Colors.redAccent,
-                      size: 20,
+                    IconButton(
+                      icon: const Icon(
+                        Icons.delete,
+                        color: Colors.redAccent,
+                        size: 20,
+                      ),
+                      onPressed: () => deleteTask(context, task),
+                      tooltip: 'Delete',
+                      constraints: const BoxConstraints(),
+                      padding: const EdgeInsets.all(6),
                     ),
-                    onPressed: () => deleteTask(context, task),
-                    tooltip: 'Delete',
-                    constraints: const BoxConstraints(),
-                    padding: const EdgeInsets.all(6),
-                  ),
+                  ],
                 ],
               ),
               const SizedBox(height: 10),
