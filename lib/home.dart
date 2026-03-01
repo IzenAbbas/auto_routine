@@ -10,8 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 enum SortOption {
-  dueDate('Due Date'),
   priority('Priority'),
+  dueDate('Due Date'),
   lastUpdated('Last Updated');
 
   final String label;
@@ -219,12 +219,17 @@ class _HomeBodyState extends State<_HomeBody> {
         actions: _isSelecting
             ? [
                 ElevatedButton.icon(
-                  label: const Text('Select All'),
-                  icon: const Icon(Icons.select_all),
+                  label: Text(
+                    'Select All',
+                    style: TextStyle(
+                      color: widget.isLight ? primaryText[0] : primaryText[1],
+                    ),
+                  ),
+                  icon: Icon(
+                    Icons.select_all,
+                    color: widget.isLight ? primaryText[0] : primaryText[1],
+                  ),
                   style: ElevatedButton.styleFrom(
-                    foregroundColor: widget.isLight
-                        ? primaryText[0]
-                        : primaryText[1],
                     backgroundColor: widget.isLight
                         ? appBackground[0]
                         : appBackground[1],
@@ -239,10 +244,6 @@ class _HomeBodyState extends State<_HomeBody> {
               ]
             : [
                 PopupMenuButton<SortOption>(
-                  icon: Icon(
-                    Icons.sort,
-                    color: widget.isLight ? primaryText[0] : primaryText[1],
-                  ),
                   tooltip: 'Sort by',
                   color: widget.isLight ? appBackground[0] : appBackground[1],
                   onSelected: (value) {
@@ -277,6 +278,27 @@ class _HomeBodyState extends State<_HomeBody> {
                       ),
                     );
                   }).toList(),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.sort,
+                        color: widget.isLight ? primaryText[0] : primaryText[1],
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Sorted By ${_sortBy.label}',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: widget.isLight
+                              ? primaryText[0]
+                              : primaryText[1],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                  ),
                 ),
               ],
       ),
