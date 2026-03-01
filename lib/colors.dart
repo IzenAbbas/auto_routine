@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-final ValueNotifier<bool> themeNotifier = ValueNotifier<bool>(false);
+final ValueNotifier<bool> themeNotifier = ValueNotifier<bool>(true);
 bool get isLight => themeNotifier.value;
 set isLight(bool value) => themeNotifier.value = value;
 

@@ -204,7 +204,9 @@ class _HomeBodyState extends State<_HomeBody> {
     return Scaffold(
       backgroundColor: widget.isLight ? appBackground[0] : appBackground[1],
       appBar: AppBar(
-        backgroundColor: widget.isLight ? appBackground[0] : appBackground[1],
+        backgroundColor: widget.isLight
+            ? secondaryAccent[0]
+            : secondaryAccent[1],
         leading: _isSelecting
             ? IconButton(
                 icon: Icon(
@@ -214,14 +216,57 @@ class _HomeBodyState extends State<_HomeBody> {
                 onPressed: _clearSelection,
                 tooltip: 'Cancel selection',
               )
-            : null,
-        title: Text(
-          _isSelecting ? '${_selectedIds.length} selected' : 'My Tasks',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: widget.isLight ? primaryText[0] : primaryText[1],
-          ),
-        ),
+            : Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Image.asset('assets/images/logo.png'),
+              ),
+        title: _isSelecting
+            ? Text(
+                '${_selectedIds.length} selected',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: widget.isLight ? primaryText[0] : primaryText[1],
+                ),
+              )
+            : Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: widget.isLight
+                      ? secondaryAccent[0]
+                      : secondaryAccent[1],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: RichText(
+                  text: TextSpan(
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: 'My ',
+                        style: TextStyle(
+                          color: widget.isLight
+                              ? primaryText[0]
+                              : primaryText[1],
+                        ),
+                      ),
+                      TextSpan(
+                        text: 'Tasks',
+                        style: TextStyle(
+                          color: widget.isLight
+                              ? primaryText[0]
+                              : primaryText[1],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+        centerTitle: true,
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -266,55 +311,78 @@ class _HomeBodyState extends State<_HomeBody> {
               ],
             ),
           if (!_isSelecting)
-            PopupMenuButton<SortOption>(
-              tooltip: 'Sort by',
-              color: widget.isLight ? appBackground[0] : appBackground[1],
-              onSelected: (value) {
-                setState(() => _sortBy = value);
-              },
-              itemBuilder: (context) => SortOption.values.map((option) {
-                return PopupMenuItem(
-                  value: option,
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: PopupMenuButton<SortOption>(
+                tooltip: 'Sort by',
+                color: widget.isLight ? secondaryAccent[0] : secondaryAccent[1],
+                onSelected: (value) {
+                  setState(() => _sortBy = value);
+                },
+                itemBuilder: (context) => SortOption.values.map((option) {
+                  return PopupMenuItem(
+                    value: option,
+                    child: Row(
+                      children: [
+                        if (_sortBy == option)
+                          const Icon(
+                            Icons.check,
+                            color: primaryAccent,
+                            size: 18,
+                          )
+                        else
+                          const SizedBox(width: 18),
+                        const SizedBox(width: 8),
+                        Text(
+                          option.label,
+                          style: TextStyle(
+                            color: widget.isLight
+                                ? primaryText[1]
+                                : primaryText[0],
+                            fontWeight: _sortBy == option
+                                ? FontWeight.w600
+                                : FontWeight.normal,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+                child: Container(
+                  padding: const EdgeInsets.only(
+                    left: 12,
+                    right: 12,
+                    top: 10,
+                    bottom: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: widget.isLight
+                        ? secondaryAccent[0]
+                        : secondaryAccent[1],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                   child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (_sortBy == option)
-                        const Icon(Icons.check, color: primaryAccent, size: 18)
-                      else
-                        const SizedBox(width: 18),
-                      const SizedBox(width: 8),
+                      Icon(
+                        Icons.sort,
+                        color: widget.isLight ? primaryText[0] : primaryText[1],
+                      ),
+                      const SizedBox(width: 6),
                       Text(
-                        option.label,
+                        _sortBy.label,
                         style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
                           color: widget.isLight
                               ? primaryText[0]
                               : primaryText[1],
-                          fontWeight: _sortBy == option
-                              ? FontWeight.w600
-                              : FontWeight.normal,
                         ),
                       ),
+                      const SizedBox(width: 8),
                     ],
                   ),
-                );
-              }).toList(),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.sort,
-                    color: widget.isLight ? primaryText[0] : primaryText[1],
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    'Sorted By ${_sortBy.label}',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: widget.isLight ? primaryText[0] : primaryText[1],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                ],
+                ),
               ),
             ),
           Expanded(
