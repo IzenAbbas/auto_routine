@@ -17,217 +17,194 @@ Future<void> editTask(BuildContext context, Task task) async {
     builder: (ctx) {
       return StatefulBuilder(
         builder: (ctx, setDialogState) {
-          return ValueListenableBuilder<bool>(
-            valueListenable: themeNotifier,
-            builder: (ctx, light, _) {
-              return AlertDialog(
-                backgroundColor: light ? appBackground[0] : appBackground[1],
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                title: Text(
-                  'Edit Task',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: light ? primaryText[0] : primaryText[1],
-                  ),
-                ),
-                content: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      TextField(
-                        controller: titleController,
-                        style: TextStyle(
-                          color: light ? primaryText[0] : primaryText[1],
-                        ),
-                        decoration: InputDecoration(
-                          hintText: 'Task title',
-                          hintStyle: TextStyle(
-                            color: light ? secondaryText[0] : secondaryText[1],
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: light
-                                  ? secondaryText[0]
-                                  : secondaryText[1],
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: primaryAccent),
-                          ),
-                        ),
+          final light = isLight;
+          return AlertDialog(
+            backgroundColor: light ? appBackground[0] : appBackground[1],
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: Text(
+              'Edit Task',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: light ? primaryText[0] : primaryText[1],
+              ),
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: titleController,
+                    style: TextStyle(
+                      color: light ? primaryText[0] : primaryText[1],
+                    ),
+                    decoration: InputDecoration(
+                      hintText: 'Task title',
+                      hintStyle: TextStyle(
+                        color: light ? secondaryText[0] : secondaryText[1],
                       ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: descController,
-                        maxLines: 3,
-                        style: TextStyle(
-                          color: light ? primaryText[0] : primaryText[1],
-                        ),
-                        decoration: InputDecoration(
-                          hintText: 'Description (optional)',
-                          hintStyle: TextStyle(
-                            color: light ? secondaryText[0] : secondaryText[1],
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: light
-                                  ? secondaryText[0]
-                                  : secondaryText[1],
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: primaryAccent),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      DropdownButtonFormField<Priority>(
-                        value: selectedPriority,
-                        dropdownColor: light
-                            ? appBackground[0]
-                            : appBackground[1],
-                        style: TextStyle(
-                          color: light ? primaryText[0] : primaryText[1],
-                        ),
-                        decoration: InputDecoration(
-                          labelText: 'Priority',
-                          labelStyle: TextStyle(
-                            color: light ? secondaryText[0] : secondaryText[1],
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: light
-                                  ? secondaryText[0]
-                                  : secondaryText[1],
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: primaryAccent),
-                          ),
-                        ),
-                        items: Priority.values.map((p) {
-                          return DropdownMenuItem(
-                            value: p,
-                            child: Text(
-                              p.label,
-                              style: TextStyle(color: p.color),
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          if (value != null) {
-                            setDialogState(() => selectedPriority = value);
-                          }
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      InkWell(
+                      enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        onTap: () async {
-                          final picked = await showDatePicker(
-                            context: ctx,
-                            initialDate: selectedDueDate ?? DateTime.now(),
-                            firstDate: DateTime.now(),
-                            lastDate: DateTime(2100),
-                          );
-                          if (picked != null) {
-                            setDialogState(() => selectedDueDate = picked);
-                          }
-                        },
-                        child: InputDecorator(
-                          decoration: InputDecoration(
-                            labelText: 'Due Date',
-                            labelStyle: TextStyle(
-                              color: light
-                                  ? secondaryText[0]
-                                  : secondaryText[1],
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(
+                        borderSide: BorderSide(
+                          color: light ? secondaryText[0] : secondaryText[1],
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: primaryAccent),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: descController,
+                    maxLines: 3,
+                    style: TextStyle(
+                      color: light ? primaryText[0] : primaryText[1],
+                    ),
+                    decoration: InputDecoration(
+                      hintText: 'Description (optional)',
+                      hintStyle: TextStyle(
+                        color: light ? secondaryText[0] : secondaryText[1],
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: light ? secondaryText[0] : secondaryText[1],
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: primaryAccent),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<Priority>(
+                    value: selectedPriority,
+                    dropdownColor: light ? appBackground[0] : appBackground[1],
+                    style: TextStyle(
+                      color: light ? primaryText[0] : primaryText[1],
+                    ),
+                    decoration: InputDecoration(
+                      labelText: 'Priority',
+                      labelStyle: TextStyle(
+                        color: light ? secondaryText[0] : secondaryText[1],
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: light ? secondaryText[0] : secondaryText[1],
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: primaryAccent),
+                      ),
+                    ),
+                    items: Priority.values.map((p) {
+                      return DropdownMenuItem(
+                        value: p,
+                        child: Text(p.label, style: TextStyle(color: p.color)),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        setDialogState(() => selectedPriority = value);
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () async {
+                      final picked = await showDatePicker(
+                        context: ctx,
+                        initialDate: selectedDueDate ?? DateTime.now(),
+                        firstDate: DateTime.now(),
+                        lastDate: DateTime(2100),
+                      );
+                      if (picked != null) {
+                        setDialogState(() => selectedDueDate = picked);
+                      }
+                    },
+                    child: InputDecorator(
+                      decoration: InputDecoration(
+                        labelText: 'Due Date',
+                        labelStyle: TextStyle(
+                          color: light ? secondaryText[0] : secondaryText[1],
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: light ? secondaryText[0] : secondaryText[1],
+                          ),
+                        ),
+                        suffixIcon: selectedDueDate != null
+                            ? IconButton(
+                                icon: Icon(
+                                  Icons.clear,
+                                  color: light
+                                      ? secondaryText[0]
+                                      : secondaryText[1],
+                                  size: 20,
+                                ),
+                                onPressed: () {
+                                  setDialogState(() => selectedDueDate = null);
+                                },
+                              )
+                            : Icon(
+                                Icons.calendar_today,
                                 color: light
                                     ? secondaryText[0]
                                     : secondaryText[1],
+                                size: 20,
                               ),
-                            ),
-                            suffixIcon: selectedDueDate != null
-                                ? IconButton(
-                                    icon: Icon(
-                                      Icons.clear,
-                                      color: light
-                                          ? secondaryText[0]
-                                          : secondaryText[1],
-                                      size: 20,
-                                    ),
-                                    onPressed: () {
-                                      setDialogState(
-                                        () => selectedDueDate = null,
-                                      );
-                                    },
-                                  )
-                                : Icon(
-                                    Icons.calendar_today,
-                                    color: light
-                                        ? secondaryText[0]
-                                        : secondaryText[1],
-                                    size: 20,
-                                  ),
-                          ),
-                          child: Text(
-                            selectedDueDate != null
-                                ? DateFormat(
-                                    'MMM dd, yyyy',
-                                  ).format(selectedDueDate!)
-                                : 'No due date',
-                            style: TextStyle(
-                              color: selectedDueDate != null
-                                  ? (light ? primaryText[0] : primaryText[1])
-                                  : (light
-                                        ? secondaryText[0]
-                                        : secondaryText[1]),
-                            ),
-                          ),
+                      ),
+                      child: Text(
+                        selectedDueDate != null
+                            ? DateFormat(
+                                'MMM dd, yyyy',
+                              ).format(selectedDueDate!)
+                            : 'No due date',
+                        style: TextStyle(
+                          color: selectedDueDate != null
+                              ? (light ? primaryText[0] : primaryText[1])
+                              : (light ? secondaryText[0] : secondaryText[1]),
                         ),
                       ),
-                    ],
-                  ),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(ctx).pop(false),
-                    child: Text(
-                      'Cancel',
-                      style: TextStyle(
-                        color: light ? secondaryText[0] : secondaryText[1],
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => Navigator.of(ctx).pop(true),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryAccent,
-                      foregroundColor: primaryText[0],
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text(
-                      'Save',
-                      style: TextStyle(fontWeight: FontWeight.w600),
                     ),
                   ),
                 ],
-              );
-            },
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(false),
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(
+                    color: light ? secondaryText[0] : secondaryText[1],
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(ctx).pop(true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryAccent,
+                  foregroundColor: primaryText[0],
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'Save',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
           );
         },
       );

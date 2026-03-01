@@ -43,10 +43,12 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
           floatingActionButton: _currentIndex == 0
-              ? FloatingActionButton(
-                  onPressed: () => addTask(context),
-                  backgroundColor: primaryAccent,
-                  child: const Icon(Icons.add),
+              ? Builder(
+                  builder: (fabContext) => FloatingActionButton(
+                    onPressed: () => addTask(fabContext),
+                    backgroundColor: primaryAccent,
+                    child: const Icon(Icons.add),
+                  ),
                 )
               : null,
           bottomNavigationBar: BottomNavigationBar(
@@ -124,55 +126,51 @@ class _HomeBodyState extends State<_HomeBody> {
       context: context,
       barrierDismissible: false,
       builder: (ctx) {
-        return ValueListenableBuilder<bool>(
-          valueListenable: themeNotifier,
-          builder: (ctx, light, _) {
-            return AlertDialog(
-              backgroundColor: light ? appBackground[0] : appBackground[1],
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              title: Text(
-                'Delete Tasks',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: light ? primaryText[0] : primaryText[1],
-                ),
-              ),
-              content: Text(
-                'Are you sure you want to delete $count selected task${count > 1 ? 's' : ''}?',
+        final light = isLight;
+        return AlertDialog(
+          backgroundColor: light ? appBackground[0] : appBackground[1],
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text(
+            'Delete Tasks',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: light ? primaryText[0] : primaryText[1],
+            ),
+          ),
+          content: Text(
+            'Are you sure you want to delete $count selected task${count > 1 ? 's' : ''}?',
+            style: TextStyle(
+              color: light ? secondaryText[0] : secondaryText[1],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text(
+                'Cancel',
                 style: TextStyle(
                   color: light ? secondaryText[0] : secondaryText[1],
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(ctx).pop(false),
-                  child: Text(
-                    'Cancel',
-                    style: TextStyle(
-                      color: light ? secondaryText[0] : secondaryText[1],
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                ElevatedButton(
-                  onPressed: () => Navigator.of(ctx).pop(true),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.redAccent,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text(
-                    'Delete',
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ],
-            );
-          },
+              ),
+              child: const Text(
+                'Delete',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
         );
       },
     );

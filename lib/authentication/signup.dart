@@ -69,16 +69,6 @@ class _SignUpState extends State<SignUp> {
           'name': _nameController.text.trim(),
           'email': _emailController.text.trim(),
         });
-
-        await userDoc.collection('tasks').doc('placeholder').set({
-          'title': '',
-          'description': '',
-          'isCompleted': false,
-          'priority': 0,
-          'createdAt': FieldValue.serverTimestamp(),
-          'updatedAt': FieldValue.serverTimestamp(),
-          'dueDate': null,
-        });
       } on FirebaseException catch (e) {
         await userCredential.user?.delete();
         _showError('Database error: ${e.message}. Please try again.');
@@ -366,7 +356,7 @@ class _SignUpState extends State<SignUp> {
                         TextSpan(
                           text: 'Log In',
                           style: TextStyle(
-                            color: isLight ? primaryText[0] : primaryText[1],
+                            color: primaryAccent,
                             fontWeight: FontWeight.w600,
                           ),
                         ),

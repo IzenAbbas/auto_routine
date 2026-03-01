@@ -19,7 +19,8 @@ enum Priority {
     }
   }
 
-  static Priority fromString(String? value) {
+  static Priority fromString(dynamic value) {
+    if (value is! String) return Priority.low;
     switch (value) {
       case 'medium':
         return Priority.medium;
