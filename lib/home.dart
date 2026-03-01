@@ -85,12 +85,14 @@ class _HomeBody extends StatefulWidget {
 
 class _HomeBodyState extends State<_HomeBody> {
   final Set<String> _selectedIds = {};
+  bool _selectionMode = false;
   SortOption _sortBy = SortOption.lastUpdated;
 
-  bool get _isSelecting => _selectedIds.isNotEmpty;
+  bool get _isSelecting => _selectionMode;
 
   void _toggleSelection(String id) {
     setState(() {
+      if (!_selectionMode) _selectionMode = true;
       if (_selectedIds.contains(id)) {
         _selectedIds.remove(id);
       } else {
@@ -106,6 +108,13 @@ class _HomeBodyState extends State<_HomeBody> {
   }
 
   void _clearSelection() {
+    setState(() {
+      _selectedIds.clear();
+      _selectionMode = false;
+    });
+  }
+
+  void _deselectAll() {
     setState(() => _selectedIds.clear());
   }
 
@@ -215,18 +224,27 @@ class _HomeBodyState extends State<_HomeBody> {
             color: widget.isLight ? primaryText[0] : primaryText[1],
           ),
         ),
-        centerTitle: !_isSelecting,
-        actions: _isSelecting
-            ? [
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          if (_isSelecting)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
                 ElevatedButton.icon(
                   label: Text(
-                    'Select All',
+                    _selectedIds.length == _currentTasks.length
+                        ? 'Deselect All'
+                        : 'Select All',
                     style: TextStyle(
                       color: widget.isLight ? primaryText[0] : primaryText[1],
                     ),
                   ),
                   icon: Icon(
-                    Icons.select_all,
+                    _selectedIds.length == _currentTasks.length
+                        ? Icons.deselect
+                        : Icons.select_all,
                     color: widget.isLight ? primaryText[0] : primaryText[1],
                   ),
                   style: ElevatedButton.styleFrom(
@@ -234,157 +252,171 @@ class _HomeBodyState extends State<_HomeBody> {
                         ? appBackground[0]
                         : appBackground[1],
                   ),
-                  onPressed: () => _selectAll(_currentTasks),
+                  onPressed: () {
+                    if (_selectedIds.length == _currentTasks.length) {
+                      _deselectAll();
+                    } else {
+                      _selectAll(_currentTasks);
+                    }
+                  },
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete, color: Colors.redAccent),
                   onPressed: _deleteSelected,
                   tooltip: 'Delete selected',
                 ),
-              ]
-            : [
-                PopupMenuButton<SortOption>(
-                  tooltip: 'Sort by',
-                  color: widget.isLight ? appBackground[0] : appBackground[1],
-                  onSelected: (value) {
-                    setState(() => _sortBy = value);
-                  },
-                  itemBuilder: (context) => SortOption.values.map((option) {
-                    return PopupMenuItem(
-                      value: option,
-                      child: Row(
-                        children: [
-                          if (_sortBy == option)
-                            const Icon(
-                              Icons.check,
-                              color: primaryAccent,
-                              size: 18,
-                            )
-                          else
-                            const SizedBox(width: 18),
-                          const SizedBox(width: 8),
-                          Text(
-                            option.label,
-                            style: TextStyle(
-                              color: widget.isLight
-                                  ? primaryText[0]
-                                  : primaryText[1],
-                              fontWeight: _sortBy == option
-                                  ? FontWeight.w600
-                                  : FontWeight.normal,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
+              ],
+            ),
+          if (!_isSelecting)
+            PopupMenuButton<SortOption>(
+              tooltip: 'Sort by',
+              color: widget.isLight ? appBackground[0] : appBackground[1],
+              onSelected: (value) {
+                setState(() => _sortBy = value);
+              },
+              itemBuilder: (context) => SortOption.values.map((option) {
+                return PopupMenuItem(
+                  value: option,
                   child: Row(
-                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        Icons.sort,
-                        color: widget.isLight ? primaryText[0] : primaryText[1],
-                      ),
-                      const SizedBox(width: 6),
+                      if (_sortBy == option)
+                        const Icon(Icons.check, color: primaryAccent, size: 18)
+                      else
+                        const SizedBox(width: 18),
+                      const SizedBox(width: 8),
                       Text(
-                        'Sorted By ${_sortBy.label}',
+                        option.label,
                         style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
                           color: widget.isLight
                               ? primaryText[0]
                               : primaryText[1],
+                          fontWeight: _sortBy == option
+                              ? FontWeight.w600
+                              : FontWeight.normal,
                         ),
                       ),
-                      const SizedBox(width: 8),
                     ],
                   ),
-                ),
-              ],
-      ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .collection('tasks')
-            .orderBy('createdAt', descending: true)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(color: primaryAccent),
-            );
-          }
-
-          if (snapshot.hasError) {
-            return Center(
-              child: Text(
-                'Something went wrong',
-                style: TextStyle(
-                  color: widget.isLight ? secondaryText[0] : secondaryText[1],
-                ),
-              ),
-            );
-          }
-
-          final docs = snapshot.data?.docs ?? [];
-
-          if (docs.isEmpty) {
-            return Center(
-              child: Column(
+                );
+              }).toList(),
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    Icons.task_outlined,
-                    size: 64,
-                    color: widget.isLight ? secondaryText[0] : secondaryText[1],
+                    Icons.sort,
+                    color: widget.isLight ? primaryText[0] : primaryText[1],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(width: 6),
                   Text(
-                    'No tasks yet',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      color: widget.isLight
-                          ? secondaryText[0]
-                          : secondaryText[1],
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Tap + to add your first task',
+                    'Sorted By ${_sortBy.label}',
                     style: TextStyle(
                       fontSize: 14,
-                      color: widget.isLight
-                          ? secondaryText[0]
-                          : secondaryText[1],
+                      fontWeight: FontWeight.w600,
+                      color: widget.isLight ? primaryText[0] : primaryText[1],
                     ),
                   ),
+                  const SizedBox(width: 8),
                 ],
               ),
-            );
-          }
+            ),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(user.uid)
+                  .collection('tasks')
+                  .orderBy('createdAt', descending: true)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(color: primaryAccent),
+                  );
+                }
 
-          final tasks = docs.map((doc) => Task.fromFirestore(doc)).toList();
-          _sortTasks(tasks);
-          _currentTasks = tasks;
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Text(
+                      'Something went wrong',
+                      style: TextStyle(
+                        color: widget.isLight
+                            ? secondaryText[0]
+                            : secondaryText[1],
+                      ),
+                    ),
+                  );
+                }
 
-          return ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            itemCount: tasks.length,
-            itemBuilder: (context, index) {
-              final task = tasks[index];
-              return _TaskTile(
-                task: task,
-                isLight: widget.isLight,
-                isSelected: _selectedIds.contains(task.id),
-                isSelecting: _isSelecting,
-                onLongPress: () => _toggleSelection(task.id),
-                onTap: _isSelecting ? () => _toggleSelection(task.id) : null,
-              );
-            },
-          );
-        },
+                final docs = snapshot.data?.docs ?? [];
+
+                if (docs.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.task_outlined,
+                          size: 64,
+                          color: widget.isLight
+                              ? secondaryText[0]
+                              : secondaryText[1],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No tasks yet',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                            color: widget.isLight
+                                ? secondaryText[0]
+                                : secondaryText[1],
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Tap + to add your first task',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: widget.isLight
+                                ? secondaryText[0]
+                                : secondaryText[1],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                final tasks = docs
+                    .map((doc) => Task.fromFirestore(doc))
+                    .toList();
+                _sortTasks(tasks);
+                _currentTasks = tasks;
+
+                return ListView.builder(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  itemCount: tasks.length,
+                  itemBuilder: (context, index) {
+                    final task = tasks[index];
+                    return _TaskTile(
+                      task: task,
+                      isLight: widget.isLight,
+                      isSelected: _selectedIds.contains(task.id),
+                      isSelecting: _isSelecting,
+                      onLongPress: () => _toggleSelection(task.id),
+                      onTap: _isSelecting
+                          ? () => _toggleSelection(task.id)
+                          : null,
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
