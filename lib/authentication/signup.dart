@@ -1,5 +1,5 @@
 import 'package:auto_routine/colors.dart';
-import 'package:auto_routine/home.dart';
+import 'package:auto_routine/screens/home.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -58,20 +58,18 @@ class _SignUpState extends State<SignUp> {
             password: _passwordController.text,
           );
 
-      // Update display name
       await userCredential.user?.updateDisplayName(_nameController.text.trim());
 
-      // Save user data to Firestore
       try {
-        final userDoc =
-            _firestore.collection('users').doc(userCredential.user?.uid);
+        final userDoc = _firestore
+            .collection('users')
+            .doc(userCredential.user?.uid);
 
         await userDoc.set({
           'name': _nameController.text.trim(),
           'email': _emailController.text.trim(),
         });
 
-        // Create the tasks sub-collection with a placeholder document
         await userDoc.collection('tasks').doc('placeholder').set({
           'title': '',
           'description': '',
@@ -82,7 +80,6 @@ class _SignUpState extends State<SignUp> {
           'dueDate': null,
         });
       } on FirebaseException catch (e) {
-        // If Firestore fails, delete the auth user to keep things in sync
         await userCredential.user?.delete();
         _showError('Database error: ${e.message}. Please try again.');
         return;

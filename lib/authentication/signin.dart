@@ -1,6 +1,7 @@
+import 'package:auto_routine/authentication/google.dart';
 import 'package:auto_routine/authentication/signup.dart';
 import 'package:auto_routine/colors.dart';
-import 'package:auto_routine/home.dart';
+import 'package:auto_routine/screens/home.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -263,7 +264,7 @@ class _SignInState extends State<SignIn> {
               const SizedBox(height: 16),
               Center(
                 child: OutlinedButton.icon(
-                  onPressed: () {},
+                  onPressed: () => googleSignIn(context),
                   style: OutlinedButton.styleFrom(
                     backgroundColor: isLight
                         ? secondaryAccent[0]

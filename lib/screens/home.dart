@@ -1,5 +1,5 @@
 import 'package:auto_routine/colors.dart';
-import 'package:auto_routine/profile.dart';
+import 'package:auto_routine/screens/profile.dart';
 import 'package:auto_routine/tasks/add_task.dart';
 import 'package:auto_routine/tasks/delete_task.dart';
 import 'package:auto_routine/tasks/edit_task.dart';
@@ -497,7 +497,6 @@ class _TaskTile extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Top row: checkbox, title, actions
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -569,7 +568,6 @@ class _TaskTile extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 10),
-              // Priority & Due Date row
               Row(
                 children: [
                   Container(
@@ -614,7 +612,6 @@ class _TaskTile extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 8),
-              // Created & Updated row
               Row(
                 children: [
                   Text(

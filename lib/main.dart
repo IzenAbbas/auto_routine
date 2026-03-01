@@ -1,5 +1,6 @@
 import 'package:auto_routine/authentication/signin.dart';
-import 'package:auto_routine/authentication/signup.dart';
+import 'package:auto_routine/screens/home.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'firebase_options.dart';
@@ -18,8 +19,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Auto-Routine',
-      theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.deepPurple)),
-      home: const SignIn(),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+      ),
+      home: FirebaseAuth.instance.currentUser != null
+          ? const HomePage()
+          : const SignIn(),
     );
   }
 }
