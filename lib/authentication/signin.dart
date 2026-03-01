@@ -1,6 +1,6 @@
 import 'package:auto_routine/authentication/signup.dart';
 import 'package:auto_routine/colors.dart';
-import 'package:auto_routine/profile.dart';
+import 'package:auto_routine/home.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -44,9 +44,9 @@ class _SignInState extends State<SignIn> {
         password: password,
       );
       if (!mounted) return;
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const CurrentuserDetails()),
-      );
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => const HomePage()));
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
       String message;

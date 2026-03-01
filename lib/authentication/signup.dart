@@ -1,5 +1,5 @@
 import 'package:auto_routine/colors.dart';
-import 'package:auto_routine/profile.dart';
+import 'package:auto_routine/home.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -63,9 +63,23 @@ class _SignUpState extends State<SignUp> {
 
       // Save user data to Firestore
       try {
-        await _firestore.collection('users').doc(userCredential.user?.uid).set({
+        final userDoc =
+            _firestore.collection('users').doc(userCredential.user?.uid);
+
+        await userDoc.set({
           'name': _nameController.text.trim(),
           'email': _emailController.text.trim(),
+        });
+
+        // Create the tasks sub-collection with a placeholder document
+        await userDoc.collection('tasks').doc('placeholder').set({
+          'title': '',
+          'description': '',
+          'isCompleted': false,
+          'priority': 0,
+          'createdAt': FieldValue.serverTimestamp(),
+          'updatedAt': FieldValue.serverTimestamp(),
+          'dueDate': null,
         });
       } on FirebaseException catch (e) {
         // If Firestore fails, delete the auth user to keep things in sync
@@ -82,7 +96,7 @@ class _SignUpState extends State<SignUp> {
           ),
         );
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const CurrentuserDetails()),
+          MaterialPageRoute(builder: (_) => const HomePage()),
           (route) => false,
         );
       }

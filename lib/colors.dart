@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
-bool isLight = false;
+final ValueNotifier<bool> themeNotifier = ValueNotifier<bool>(false);
+bool get isLight => themeNotifier.value;
+set isLight(bool value) => themeNotifier.value = value;
+
 //Accent
 const Color primaryAccent = Color(0xFF14E56A);
 const List<Color> secondaryAccent = [Color(0xFFE2FBEB), Color(0xFF0C4F2E)];
