@@ -1,4 +1,3 @@
-// ignore_for_file: type=lint
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
@@ -53,7 +52,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '1095951672929',
     projectId: 'autoroutine-92c6d',
     storageBucket: 'autoroutine-92c6d.firebasestorage.app',
-    iosClientId: '1095951672929-7jlma83i4ajmf1993a4560hah3g971r2.apps.googleusercontent.com',
+    iosClientId:
+        '1095951672929-7jlma83i4ajmf1993a4560hah3g971r2.apps.googleusercontent.com',
     iosBundleId: 'com.example.autoRoutine',
   );
 
@@ -63,7 +63,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '1095951672929',
     projectId: 'autoroutine-92c6d',
     storageBucket: 'autoroutine-92c6d.firebasestorage.app',
-    iosClientId: '1095951672929-7jlma83i4ajmf1993a4560hah3g971r2.apps.googleusercontent.com',
+    iosClientId:
+        '1095951672929-7jlma83i4ajmf1993a4560hah3g971r2.apps.googleusercontent.com',
     iosBundleId: 'com.example.autoRoutine',
   );
 
@@ -76,5 +77,4 @@ class DefaultFirebaseOptions {
     storageBucket: 'autoroutine-92c6d.firebasestorage.app',
     measurementId: 'G-BCGE2CB36P',
   );
-
 }

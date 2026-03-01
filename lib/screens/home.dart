@@ -85,10 +85,52 @@ class _HomeBody extends StatefulWidget {
   State<_HomeBody> createState() => _HomeBodyState();
 }
 
-class _HomeBodyState extends State<_HomeBody> {
+class _HomeBodyState extends State<_HomeBody>
+    with SingleTickerProviderStateMixin {
   final Set<String> _selectedIds = {};
   bool _selectionMode = false;
   SortOption _sortBy = SortOption.lastUpdated;
+  late final TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) {
+        _clearSelection();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  bool _isOverdue(Task task) {
+    if (task.dueDate == null || task.isCompleted) return false;
+    final now = DateTime.now();
+    return DateTime(
+      task.dueDate!.year,
+      task.dueDate!.month,
+      task.dueDate!.day,
+    ).isBefore(DateTime(now.year, now.month, now.day));
+  }
+
+  List<Task> _filterTasks(List<Task> allTasks, int tabIndex) {
+    switch (tabIndex) {
+      case 0:
+        return allTasks.where((t) => !t.isCompleted && !_isOverdue(t)).toList();
+      case 1:
+        return allTasks.where((t) => _isOverdue(t)).toList();
+      case 2:
+        return allTasks.where((t) => t.isCompleted).toList();
+      default:
+        return allTasks;
+    }
+  }
 
   bool get _isSelecting => _selectionMode;
 
@@ -266,7 +308,40 @@ class _HomeBodyState extends State<_HomeBody> {
                   ),
                 ),
               ),
-        centerTitle: true,
+        titleSpacing: 0,
+        centerTitle: false,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(49),
+          child: Column(
+            children: [
+              Divider(
+                height: 1,
+                thickness: 1,
+                color: widget.isLight
+                    ? Colors.grey.shade300
+                    : Colors.white.withValues(alpha: 0.12),
+              ),
+              TabBar(
+                controller: _tabController,
+                labelColor: widget.isLight ? primaryText[0] : primaryText[1],
+                unselectedLabelColor: widget.isLight
+                    ? secondaryText[0]
+                    : secondaryText[1],
+                indicatorColor: primaryAccent,
+                indicatorWeight: 3,
+                labelStyle: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
+                tabs: const [
+                  Tab(text: 'Pending'),
+                  Tab(text: 'Overdue'),
+                  Tab(text: 'Completed'),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -312,7 +387,7 @@ class _HomeBodyState extends State<_HomeBody> {
             ),
           if (!_isSelecting)
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.only(top: 14, right: 16),
               child: PopupMenuButton<SortOption>(
                 tooltip: 'Sort by',
                 color: widget.isLight ? secondaryAccent[0] : secondaryAccent[1],
@@ -453,31 +528,88 @@ class _HomeBodyState extends State<_HomeBody> {
                   );
                 }
 
-                final tasks = docs
+                final allTasks = docs
                     .map((doc) => Task.fromFirestore(doc))
                     .toList();
-                _sortTasks(tasks);
-                _currentTasks = tasks;
+                _sortTasks(allTasks);
+                _currentTasks = allTasks;
 
-                return ListView.builder(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  itemCount: tasks.length,
-                  itemBuilder: (context, index) {
-                    final task = tasks[index];
-                    return _TaskTile(
-                      task: task,
-                      isLight: widget.isLight,
-                      isSelected: _selectedIds.contains(task.id),
-                      isSelecting: _isSelecting,
-                      onLongPress: () => _toggleSelection(task.id),
-                      onTap: _isSelecting
-                          ? () => _toggleSelection(task.id)
-                          : null,
+                return TabBarView(
+                  controller: _tabController,
+                  children: List.generate(3, (tabIndex) {
+                    final filtered = _filterTasks(allTasks, tabIndex);
+
+                    if (filtered.isEmpty) {
+                      final messages = [
+                        ['No pending tasks', 'All caught up!'],
+                        ['No overdue tasks', 'You\'re on track!'],
+                        [
+                          'No completed tasks',
+                          'Complete a task to see it here',
+                        ],
+                      ];
+                      return Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              tabIndex == 0
+                                  ? Icons.task_outlined
+                                  : tabIndex == 1
+                                  ? Icons.warning_amber_rounded
+                                  : Icons.check_circle_outline,
+                              size: 64,
+                              color: widget.isLight
+                                  ? secondaryText[0]
+                                  : secondaryText[1],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              messages[tabIndex][0],
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w600,
+                                color: widget.isLight
+                                    ? secondaryText[0]
+                                    : secondaryText[1],
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              messages[tabIndex][1],
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: widget.isLight
+                                    ? secondaryText[0]
+                                    : secondaryText[1],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+
+                    return ListView.builder(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      itemCount: filtered.length,
+                      itemBuilder: (context, index) {
+                        final task = filtered[index];
+                        return _TaskTile(
+                          task: task,
+                          isLight: widget.isLight,
+                          isSelected: _selectedIds.contains(task.id),
+                          isSelecting: _isSelecting,
+                          onLongPress: () => _toggleSelection(task.id),
+                          onTap: _isSelecting
+                              ? () => _toggleSelection(task.id)
+                              : null,
+                        );
+                      },
                     );
-                  },
+                  }),
                 );
               },
             ),
@@ -566,7 +698,6 @@ class _TaskTile extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(width: 4),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -705,6 +836,40 @@ class _TaskTile extends StatelessWidget {
                   ),
                 ],
               ),
+              if (!isSelecting) ...[
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    onPressed: _toggleComplete,
+                    icon: Icon(
+                      task.isCompleted
+                          ? Icons.undo_rounded
+                          : Icons.check_circle_outline,
+                      size: 18,
+                      color: task.isCompleted ? Colors.orange : Colors.green,
+                    ),
+                    label: Text(
+                      task.isCompleted
+                          ? 'Mark as pending'
+                          : 'Mark as completed',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: task.isCompleted ? Colors.orange : Colors.green,
+                      ),
+                    ),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         ),
