@@ -412,8 +412,8 @@ class _HomeBodyState extends State<_HomeBody>
                           option.label,
                           style: TextStyle(
                             color: widget.isLight
-                                ? primaryText[1]
-                                : primaryText[0],
+                                ? primaryText[0]
+                                : primaryText[1],
                             fontWeight: _sortBy == option
                                 ? FontWeight.w600
                                 : FontWeight.normal,
